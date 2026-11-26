@@ -1,0 +1,237 @@
+/* Meridian Run — dusk-panel styling: deep indigo glass, amber instrument
+   light, cream type. Everything is an overlay on the WebGL canvas. */
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #171226;
+  font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  color: #f5efe2;
+  user-select: none;
+}
+
+#game-holder, #game-holder canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+
+.hud-card {
+  position: absolute;
+  background: rgba(12, 14, 26, 0.72);
+  border: 1px solid rgba(255, 179, 107, 0.55);
+  border-radius: 10px;
+  padding: 10px 14px;
+  backdrop-filter: blur(3px);
+}
+
+#hud-top-left { top: 14px; left: 14px; max-width: 400px; }
+#hud-mission-name { font-weight: 800; letter-spacing: 2px; color: #ffc46b; font-size: 17px; }
+#hud-objective { font-size: 12.5px; line-height: 1.45; color: #e8e0cd; margin-top: 3px; }
+#hud-rings { margin-top: 6px; font-family: ui-monospace, monospace; font-weight: 700; color: #ffd98a; font-size: 14px; letter-spacing: 1px; }
+
+#hud-top-right { top: 14px; right: 14px; text-align: right; }
+#hud-clock { font-family: ui-monospace, monospace; font-size: 20px; font-weight: 700; color: #ffd98a; }
+#hud-score { font-family: ui-monospace, monospace; font-size: 13px; color: #e8e0cd; margin-top: 2px; letter-spacing: 1px; }
+
+#hud-banner {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: #ffd98a;
+  text-shadow: 0 2px 18px rgba(255, 150, 60, 0.65), 0 1px 2px #000;
+  opacity: 0;
+  transition: opacity 0.35s;
+  white-space: nowrap;
+}
+
+#hud-toast {
+  position: absolute;
+  top: 24%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 17px;
+  font-weight: 600;
+  color: #f5efe2;
+  background: rgba(12, 14, 26, 0.66);
+  border: 1px solid rgba(255, 196, 107, 0.4);
+  border-radius: 8px;
+  padding: 6px 14px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+}
+
+#hud-bottom {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  background: rgba(10, 12, 22, 0.78);
+  border: 1px solid rgba(255, 179, 107, 0.55);
+  border-radius: 14px;
+  padding: 8px 16px 4px;
+  backdrop-filter: blur(3px);
+}
+
+#hud-readouts { display: flex; gap: 16px; padding-bottom: 16px; }
+.readout { text-align: center; }
+.ro-label { display: block; font-size: 10px; letter-spacing: 2px; color: #ffb36b; font-weight: 700; }
+.readout span:nth-child(2) {
+  font-family: ui-monospace, monospace;
+  font-size: 27px;
+  font-weight: 700;
+  color: #fff3d6;
+  text-shadow: 0 0 9px rgba(255, 196, 107, 0.55);
+}
+.ro-unit { font-size: 11px; color: #cbbfa5; margin-left: 2px; }
+
+#hud-bars { padding-bottom: 18px; width: 168px; }
+.bar-row { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+.bar-label { font-size: 10px; letter-spacing: 1.5px; color: #ffb36b; font-weight: 700; width: 34px; }
+.bar { flex: 1; height: 9px; background: rgba(255, 255, 255, 0.13); border-radius: 5px; overflow: hidden; }
+.bar > div { height: 100%; width: 100%; border-radius: 5px; transition: width 0.2s; }
+#bar-fuel { background: #ffc46b; }
+#bar-hull { background: #7ddc7d; }
+#bar-thr { background: #7ab8ff; }
+
+#hud-pointer {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  text-align: center;
+  color: #ffd98a;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 4px #000;
+}
+#hud-pointer-arrow { font-size: 21px; display: inline-block; text-shadow: 0 0 10px rgba(255, 170, 60, 0.8); }
+
+/* Screenshot staging (?shot=...) keeps the panel but drops the fanfare. */
+.shot-mode #hud-banner, .shot-mode #hud-toast { display: none; }
+
+#hud-stall {
+  position: absolute;
+  left: 50%;
+  top: 34%;
+  transform: translateX(-50%);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  color: #ff5a4a;
+  text-shadow: 0 0 14px rgba(255, 60, 40, 0.7);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+/* ---- overlays ---------------------------------------------------------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 50% 65%, rgba(23, 18, 38, 0.25), rgba(10, 8, 20, 0.78));
+}
+.overlay.hidden { display: none; }
+
+.panel {
+  background: rgba(16, 15, 30, 0.92);
+  border: 1px solid rgba(255, 179, 107, 0.6);
+  border-radius: 16px;
+  padding: 28px 34px;
+  text-align: center;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+}
+.menu-panel { max-width: 680px; width: min(680px, 92vw); max-height: 92vh; overflow-y: auto; }
+.small-panel { max-width: 440px; width: min(440px, 92vw); }
+
+.game-kicker { font-size: 11.5px; letter-spacing: 4px; color: #ffb36b; font-weight: 700; }
+.game-title {
+  margin: 6px 0 4px;
+  font-size: 54px;
+  letter-spacing: 5px;
+  font-weight: 900;
+  color: #ffd98a;
+  text-shadow: 0 3px 24px rgba(255, 150, 60, 0.5);
+}
+.game-tag { margin: 4px auto 18px; max-width: 520px; font-size: 14.5px; line-height: 1.55; color: #e8e0cd; }
+
+#mission-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.mission-btn {
+  pointer-events: auto;
+  text-align: left;
+  background: rgba(255, 179, 107, 0.08);
+  border: 1px solid rgba(255, 179, 107, 0.45);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #f5efe2;
+  cursor: pointer;
+  font-family: inherit;
+}
+.mission-btn:hover:not(:disabled) { background: rgba(255, 179, 107, 0.2); }
+.mission-btn:disabled { opacity: 0.42; cursor: default; }
+.mission-btn .mb-num { font-size: 10.5px; letter-spacing: 2px; color: #ffb36b; font-weight: 700; }
+.mission-btn .mb-name { font-size: 16.5px; font-weight: 800; margin: 2px 0; }
+.mission-btn .mb-meta { font-size: 11.5px; color: #cbbfa5; }
+.mission-btn .mb-done { color: #7ddc7d; font-weight: 700; }
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px 14px;
+  font-size: 12.5px;
+  color: #cbbfa5;
+  margin-bottom: 12px;
+}
+.controls-grid b { color: #ffd98a; font-family: ui-monospace, monospace; }
+.menu-foot { font-size: 11.5px; color: #9a8f78; margin: 0; }
+
+.panel h2 { margin: 0 0 8px; font-size: 30px; letter-spacing: 3px; color: #ffd98a; }
+.panel-line { font-size: 14px; line-height: 1.55; color: #e8e0cd; margin: 0 0 16px; }
+.end-stats {
+  font-family: ui-monospace, monospace;
+  font-size: 14px;
+  line-height: 1.9;
+  color: #f5efe2;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 18px;
+  text-align: left;
+}
+.end-stats b { color: #ffd98a; float: right; }
+
+.big-btn, .ghost-btn {
+  display: block;
+  width: 100%;
+  pointer-events: auto;
+  font-family: inherit;
+  font-weight: 800;
+  letter-spacing: 2px;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+.big-btn { background: linear-gradient(180deg, #ffc46b, #f59b3c); border: none; color: #2a1602; font-size: 16px; }
+.big-btn:hover { filter: brightness(1.08); }
+.ghost-btn { background: transparent; border: 1px solid rgba(255, 179, 107, 0.5); color: #ffd98a; font-size: 13.5px; }
+.ghost-btn:hover { background: rgba(255, 179, 107, 0.12); }

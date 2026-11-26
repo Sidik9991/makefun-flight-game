@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian Run — a golden-hour airmail flight game</title>
+<link rel="stylesheet" href="src/style.css">
+</head>
+<body>
+<div id="game-holder"></div>
+
+<div id="hud"></div>
+
+<div id="menu" class="overlay">
+  <div class="panel menu-panel">
+    <div class="game-kicker">MERIDIAN AIR POST · EST. GOLDEN HOUR</div>
+    <h1 class="game-title">MERIDIAN RUN</h1>
+    <p class="game-tag">Six airmail sorties over a sunset archipelago. Thread the golden rings,
+      mind your fuel and your floats, and put her down on the strip like you mean it.</p>
+    <div id="mission-list"></div>
+    <div class="controls-grid">
+      <div><b>W / S</b> throttle up / down</div>
+      <div><b>↑ / ↓</b> climb / descend</div>
+      <div><b>← / →</b> bank &amp; turn</div>
+      <div><b>A / D</b> rudder</div>
+      <div><b>Mouse drag</b> steer</div>
+      <div><b>P / Esc</b> pause · <b>M</b> mute</div>
+    </div>
+    <p class="menu-foot">A complete flight game in your browser — no downloads, no network.
+      Built for the make.fun best flight game bounty.</p>
+  </div>
+</div>
+
+<div id="pause-overlay" class="overlay hidden">
+  <div class="panel small-panel">
+    <h2>PAUSED</h2>
+    <p class="panel-line">The Kestrel hangs in the evening air, waiting on you.</p>
+    <button id="btn-resume" class="big-btn">RESUME</button>
+    <button id="btn-restart" class="ghost-btn">RESTART SORTIE</button>
+    <button id="btn-quit" class="ghost-btn">BACK TO MISSIONS</button>
+  </div>
+</div>
+
+<div id="end-overlay" class="overlay hidden">
+  <div class="panel small-panel">
+    <h2 id="end-title">MISSION COMPLETE</h2>
+    <p id="end-line" class="panel-line"></p>
+    <div id="end-stats" class="end-stats"></div>
+    <button id="btn-next" class="big-btn">NEXT SORTIE</button>
+    <button id="btn-retry" class="ghost-btn">FLY IT AGAIN</button>
+    <button id="btn-menu" class="ghost-btn">BACK TO MISSIONS</button>
+  </div>
+</div>
+
+<script>
+  // A tiny error trap so a broken build says so on the page (and so our own
+  // headless screenshot runs can read window.__errors and know it loaded).
+  window.__errors = [];
+  window.addEventListener('error', function (e) {
+    window.__errors.push(String(e.message || e.type));
+  });
+</script>
+<script src="vendor/three.min.js"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
