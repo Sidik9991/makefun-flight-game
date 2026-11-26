@@ -1,8 +1,9 @@
-// audio.js — a synthesized soundscape, no audio files: a two-oscillator
-// engine whose pitch follows the throttle, filtered wind that rises with
-// airspeed, a two-note chime for each ring, a small major arpeggio for a
-// landing made good, and a noise burst for one made badly. The context is
-// created lazily on the pilot's first input, as browsers require a gesture.
+// audio.js — the sound, synthesized live with WebAudio and no audio
+// files: a two-oscillator engine whose pitch follows the throttle,
+// filtered wind that rises with airspeed, a two-note chime per ring, a
+// major arpeggio for a landing made good, and a noise burst for one made
+// badly. The context wakes on the pilot's first input, as browsers
+// require a gesture before sound.
 
 export function createAudio() {
   let ctx = null;

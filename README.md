@@ -59,7 +59,16 @@ mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 ```
 
 The screenshots in `screenshots/` are real renders of this game's own code,
-taken by its maker in a headless browser from staged mid-sortie scenes
-(`game/src/main.js` answers `?shot=cover|rings|city|landing`).
+taken by its maker in a headless browser from staged scenes
+(`game/src/main.js` answers `?shot=cover|menu|coast|summit|stakes|progress|result`):
+
+- `01-cover.jpg` — threading the Thread canyon, third ring close ahead,
+  walls on both shoulders, the panel lit at 118 kt.
+- `02-sortie-select.jpg` — the sortie board: all six courses with their
+  ring counts (35 rings in all), two delivered, four ready to fly.
+- `03-storm-stakes.jpg` — the Storm Ledger with the stakes showing: the
+  fuel bar down to a red stub, the hull bar spent, rings still ahead.
+- `04-landing-result.jpg` — the postmaster's debrief: rings 5/5, a GREASER
+  landing rating, grade S, and the mail score in the ledger.
 
 MIT licensed — see `LICENSE`.

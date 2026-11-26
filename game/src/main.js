@@ -1,8 +1,9 @@
-// main.js — Meridian Run's conductor: renderer and chase camera, keyboard
-// and mouse input, the menu / flying / paused / complete state machine,
-// mission flow, scoring, and the staged scenes the screenshots are taken
-// from. The world lives in terrain.js, the aeroplane in aircraft.js, the
-// sorties in missions.js, the panel in hud.js, the sound in audio.js.
+// main.js — the conductor: renderer and chase camera, keyboard and mouse
+// input, the menu / flying / paused / complete state machine, mission
+// flow and scoring, ground-crew servicing, gusting wind, and the staged
+// ?shot= scenes the screenshots are taken from. The world lives in
+// terrain.js, the aeroplane in aircraft.js, the sorties in missions.js,
+// the panel in hud.js, the sound in audio.js.
 
 import { buildWorld, isOnRunway, terrainHeight } from './terrain.js';
 import { PLANE, createAircraft } from './aircraft.js';
@@ -450,13 +451,15 @@ function stageShotScene(name) {
   }
 
   const scenes = {
-    // Threading the Thread: on the river's centreline, first ring close
-    // ahead, canyon walls on both shoulders, panel lit, speed up.
-    cover: { mission: 2, x: 592, y: 66, z: 470, headingDeg: 355, speed: 57, throttle: 0.74 },
+    // Threading the Thread: deep in the canyon on the river's centreline,
+    // third ring close ahead, rock walls on both shoulders, panel lit.
+    cover: { mission: 2, x: 214, y: 64, z: -350, headingDeg: 335, speed: 57, throttle: 0.74, flown: 2, mail: 200 },
     // The Harbour Chain over Port Meridian's blocks, third ring lit.
     coast: { mission: 1, x: 600, y: 112, z: 180, headingDeg: 130, speed: 55, throttle: 0.66, flown: 2, mail: 200 },
-    // Summit Post on the Anvil climb, above the snow line, third ring lit.
-    summit: { mission: 3, x: 1130, y: 395, z: -1360, headingDeg: 70, speed: 58, throttle: 0.72, flown: 2, mail: 200 },
+    // Summit Post on the Anvil climb, above the snow line, third ring lit
+    // and close: already on the climb gradient, fast, so she holds the
+    // line instead of wallowing up to it.
+    summit: { mission: 3, x: 1230, y: 425, z: -1420, headingDeg: 68, speed: 62, throttle: 0.8, flown: 2, mail: 200 },
     // The Storm Ledger with the stakes showing: fuel at 15, hull at 58,
     // Lantern Isle and its lighthouse ahead through the crosswind.
     stakes: { mission: 4, x: -1470, y: 96, z: 1000, headingDeg: 208, speed: 52, throttle: 0.68, flown: 3, mail: 300, fuel: 15, damage: 42 },

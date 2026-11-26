@@ -1,8 +1,8 @@
-// hud.js — everything the pilot reads: the DOM overlay (mission card,
-// banners, fuel and damage bars) and a canvas instrument cluster drawn like
-// a lit panel — artificial horizon, airspeed and altimeter dials, a compass
-// ribbon — plus the big digital ALT / SPD / HDG readouts the screenshots
-// need to read at a glance.
+// hud.js — the panel: everything the pilot reads, drawn fresh each frame —
+// a lit instrument cluster (artificial horizon, airspeed and altimeter
+// dials, compass ribbon), digital ALT / SPD / HDG / V-S readouts, fuel /
+// hull / throttle bars, the mission card with the ring count, the
+// objective pointer, stall warning, banners and toasts.
 
 const COMPASS_POINTS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
 
