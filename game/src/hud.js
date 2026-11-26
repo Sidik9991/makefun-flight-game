@@ -159,7 +159,8 @@ export function createHud(root) {
       if (deg % 45 === 0) {
         g.fillStyle = '#ffd98a';
         g.fillText(COMPASS_POINTS[deg / 45], x, cy + 4);
-      } else if (deg % 15 === 0) {
+      } else if (deg % 30 === 0) {
+        // Compass tens are only whole at the 30s: 03, 06, 12 ... 33.
         g.fillStyle = '#e8e4da';
         g.fillText(String(deg / 10).padStart(2, '0'), x, cy + 4);
       } else {
