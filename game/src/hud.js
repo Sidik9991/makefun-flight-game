@@ -140,20 +140,22 @@ export function createHud(root) {
   }
 
   function drawCompass(g, cx, cy, w, headingDeg) {
+    // A ribbon showing 90 degrees of compass at a time: cardinal letters at
+    // the 45s, two-digit tens at the 15s, plain ticks between. Labels are
+    // bounds-checked against the box instead of clipped, so nothing smears.
     g.save();
     g.fillStyle = 'rgba(10,14,22,0.88)';
     g.fillRect(cx - w / 2, cy - 13, w, 26);
     g.strokeStyle = '#ffb36b';
     g.lineWidth = 1.6;
     g.strokeRect(cx - w / 2, cy - 13, w, 26);
-    g.beginPath();
-    g.rect(cx - w / 2, cy - 13, w, 26);
-    g.clip();
-    g.font = 'bold 12px monospace';
+    g.font = 'bold 11px monospace';
     g.textAlign = 'center';
-    for (let d = -60; d <= 60; d += 5) {
-      const deg = ((Math.round(headingDeg + d) % 360) + 360) % 360;
-      const x = cx + (d / 60) * (w / 2);
+    const base = Math.round(headingDeg / 5) * 5;
+    for (let d = -50; d <= 50; d += 5) {
+      const deg = (((base + d) % 360) + 360) % 360;
+      const x = cx + ((headingDeg - base + d) / 90) * w;
+      if (x < cx - w / 2 + 9 || x > cx + w / 2 - 9) continue;
       if (deg % 45 === 0) {
         g.fillStyle = '#ffd98a';
         g.fillText(COMPASS_POINTS[deg / 45], x, cy + 4);
@@ -161,8 +163,8 @@ export function createHud(root) {
         g.fillStyle = '#e8e4da';
         g.fillText(String(deg / 10).padStart(2, '0'), x, cy + 4);
       } else {
-        g.fillStyle = 'rgba(232,228,218,0.6)';
-        g.fillRect(x, cy - 6, 1.4, 6);
+        g.fillStyle = 'rgba(232,228,218,0.55)';
+        g.fillRect(x - 0.7, cy - 5, 1.4, 5);
       }
     }
     g.restore();
@@ -196,7 +198,7 @@ export function createHud(root) {
       }
       el('ro-alt').textContent = String(Math.max(0, Math.round(s.altitude)));
       el('ro-spd').textContent = String(Math.round(s.speed * 1.944)); // m/s -> knots
-      el('ro-hdg').textContent = String(Math.round(s.headingDeg)).padStart(3, '0');
+      el('ro-hdg').textContent = String(Math.round(s.headingDeg) % 360).padStart(3, '0');
       el('ro-vs').textContent = (s.verticalSpeed >= 0 ? '+' : '') + s.verticalSpeed.toFixed(1);
       el('hud-rings').textContent = `RINGS ${s.ringsFlown} / ${s.ringsTotal}`;
       const mm = String(Math.floor(s.time / 60)).padStart(2, '0');

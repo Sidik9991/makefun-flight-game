@@ -52,7 +52,21 @@ function runwayBlend(x, z) {
   const dz = Math.max(z < RUNWAY.zFrom ? RUNWAY.zFrom - z - 60 : z > RUNWAY.zTo ? z - RUNWAY.zTo - 60 : 0, 0);
   const d = Math.sqrt(dx * dx + dz * dz);
   const t = Math.min(Math.max(d / 130, 0), 1);
-  return 1 - t * t * (3 - 2 * t);
+  let blend = 1 - t * t * (3 - 2 * t);
+  // Approach corridors: a pilot on final must not meet a hillside, so the
+  // ground along the centreline's extension is coaxed toward strip level
+  // for 800 m past each threshold, fading with distance and offset.
+  const cx = Math.abs(x - RUNWAY.x);
+  if (cx < 130) {
+    const beyond = z < RUNWAY.zFrom ? RUNWAY.zFrom - z : z > RUNWAY.zTo ? z - RUNWAY.zTo : 0;
+    if (beyond > 0 && beyond < 800) {
+      const along = 1 - beyond / 800;
+      const across = 1 - cx / 130;
+      const corridor = (along * along * (3 - 2 * along)) * (across * across * (3 - 2 * across)) * 0.92;
+      blend = Math.max(blend, corridor);
+    }
+  }
+  return blend;
 }
 
 export function terrainHeight(x, z) {
@@ -193,11 +207,13 @@ function buildSea(scene) {
   sea.rotation.x = -Math.PI / 2;
   sea.position.y = SEA_LEVEL;
   scene.add(sea);
-  // The river: a bright ribbon following the canyon floor. The tube is
-  // squashed flat so it hugs the channel the height field carved.
+  // The river: a bright ribbon following the canyon floor. Its height uses
+  // the same floor formula as the carve in terrainHeight (plus a step up so
+  // the water shows), and the tube is squashed flat to hug the channel.
   const pts = [];
   for (let z = -1700; z <= 480; z += 40) {
-    pts.push(new THREE.Vector3(riverCentreX(z), 5.4, z));
+    const floorY = 6 + 3 * Math.sin(z * 0.004);
+    pts.push(new THREE.Vector3(riverCentreX(z), floorY + 1.1, z));
   }
   const riverGeo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 60, 26, 5, false);
   const river = new THREE.Mesh(

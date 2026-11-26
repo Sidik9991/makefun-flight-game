@@ -146,6 +146,14 @@ function togglePause() {
   }
 }
 
+// The postmaster's grade: a clean, thrifty sortie earns the brass S.
+function sortieGrade() {
+  if (plane.damage < 5 && plane.fuel > 25) return 'S — flawless post';
+  if (plane.damage < 20 && plane.fuel > 10) return 'A — crisp flying';
+  if (plane.damage < 45) return 'B — mail through, bent edges';
+  return 'C — delivered, but the ledger winces';
+}
+
 function endSortie(kind, headline, line) {
   state = kind; // 'complete' or 'crashed'
   endEl.classList.remove('hidden');
@@ -163,6 +171,7 @@ function endSortie(kind, headline, line) {
     `Fuel left <b>${Math.round(plane.fuel)}%</b><br>` +
     `Hull damage <b>${Math.round(plane.damage)}%</b><br>` +
     (plane.landedRating ? `Landing <b>${plane.landedRating}</b><br>` : '') +
+    (kind === 'complete' ? `Postmaster's grade <b>${sortieGrade()}</b><br>` : '') +
     `Mail score <b>${score}</b>`;
   const nextBtn = document.getElementById('btn-next');
   nextBtn.style.display = kind === 'complete' && currentMission + 1 < MISSIONS.length ? 'block' : 'none';
@@ -306,6 +315,18 @@ function serviceOnGround(dt) {
   }
 }
 
+// The evening wind is never quite steady: each mission's base wind carries
+// slow gusts that swell and fade over ~20 seconds, stronger at altitude —
+// a crosswind on final is a decision, not a decoration.
+const gustWind = { x: 0, z: 0 };
+function windFor(mission, time, altitude) {
+  const swell = 0.55 + 0.45 * Math.sin(time * 0.31) * Math.sin(time * 0.117 + 1.3);
+  const altitudeFactor = 0.7 + Math.min(0.9, Math.max(0, altitude) / 500);
+  gustWind.x = mission.wind.x * swell * altitudeFactor + Math.sin(time * 0.53) * 0.7;
+  gustWind.z = mission.wind.z * swell * altitudeFactor + Math.cos(time * 0.41) * 0.7;
+  return gustWind;
+}
+
 let last = performance.now();
 let frames = 0;
 
@@ -325,7 +346,7 @@ function frame(now) {
     const events = [];
     prevPos.copy(plane.position);
     const input = shotMode ? autopilotInput() : readInput();
-    plane.update(dt, input, MISSIONS[currentMission].wind, events);
+    plane.update(dt, input, windFor(MISSIONS[currentMission], sortieTime, plane.position.y), events);
     if (course) course.update(dt, prevPos, plane.position, events);
     handleEvents(events);
     serviceOnGround(dt);
@@ -390,10 +411,10 @@ function autopilotInput() {
 
 function stageShotScene(name) {
   const scenes = {
-    cover: { mission: 0, x: -260, y: 88, z: 1180, headingDeg: 0, speed: 47, throttle: 0.6 },
-    rings: { mission: 2, x: 610, y: 92, z: 560, headingDeg: 338, speed: 52, throttle: 0.64 },
+    cover: { mission: 0, x: -260, y: 118, z: 520, headingDeg: 0, speed: 47, throttle: 0.6 },
+    rings: { mission: 2, x: 602, y: 70, z: 430, headingDeg: 350, speed: 52, throttle: 0.64 },
     city: { mission: 1, x: 120, y: 128, z: 640, headingDeg: 74, speed: 54, throttle: 0.66 },
-    landing: { mission: 0, x: -258, y: 40, z: 1300, headingDeg: 0, speed: 35, throttle: 0.3 },
+    landing: { mission: 0, x: -258, y: 55, z: 1250, headingDeg: 0, speed: 35, throttle: 0.3 },
   };
   const s = scenes[name] || scenes.cover;
   document.body.classList.add('shot-mode');
@@ -403,7 +424,7 @@ function stageShotScene(name) {
   if (name === 'city') {
     autopilotTarget = { x: 950, y: 105, z: 380 }; // a long banked run over Port Meridian
   } else if (name === 'landing') {
-    autopilotTarget = { x: RUNWAY.x, y: RUNWAY.elevation + 2, z: RUNWAY.zTo + 30 };
+    autopilotTarget = { x: RUNWAY.x, y: RUNWAY.elevation + 2, z: RUNWAY.zTo - 20 };
   } else if (course && course.next) {
     autopilotTarget = course.next.data;
   }

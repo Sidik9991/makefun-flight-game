@@ -126,13 +126,15 @@ export const MISSIONS = [
 // sink away; rings still to come wait dimmer down the course.
 export function createCourse(scene, mission) {
   const group = new THREE.Group();
-  const ringGeo = new THREE.TorusGeometry(RING_RADIUS, 1.7, 10, 36);
+  const ringGeo = new THREE.TorusGeometry(RING_RADIUS, 2.1, 10, 36);
   const discGeo = new THREE.CircleGeometry(RING_RADIUS, 36);
   const meshes = mission.rings.map((r, i) => {
     const holder = new THREE.Group();
+    // fog: false — a course beacon must burn through the dusk haze at any
+    // range, or the pilot (and the screenshots) cannot read the course.
     const torus = new THREE.Mesh(
       ringGeo,
-      new THREE.MeshBasicMaterial({ color: 0xffa63e, transparent: true, opacity: 0.95 }),
+      new THREE.MeshBasicMaterial({ color: 0xffa63e, transparent: true, opacity: 0.95, fog: false }),
     );
     holder.add(torus);
     const disc = new THREE.Mesh(
@@ -143,6 +145,7 @@ export function createCourse(scene, mission) {
         opacity: 0.1,
         side: THREE.DoubleSide,
         depthWrite: false,
+        fog: false,
       }),
     );
     holder.add(disc);
