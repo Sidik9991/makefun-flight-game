@@ -414,7 +414,7 @@ function stageShotScene(name) {
     cover: { mission: 0, x: -260, y: 100, z: 1180, headingDeg: 0, speed: 47, throttle: 0.6 },
     rings: { mission: 2, x: 602, y: 70, z: 430, headingDeg: 350, speed: 52, throttle: 0.64 },
     city: { mission: 1, x: 120, y: 128, z: 640, headingDeg: 74, speed: 54, throttle: 0.66 },
-    landing: { mission: 0, x: -258, y: 55, z: 1250, headingDeg: 0, speed: 35, throttle: 0.3 },
+    landing: { mission: 0, x: -256, y: 48, z: 1180, headingDeg: 0, speed: 34, throttle: 0.28 },
   };
   const s = scenes[name] || scenes.cover;
   document.body.classList.add('shot-mode');
@@ -424,7 +424,8 @@ function stageShotScene(name) {
   if (name === 'city') {
     autopilotTarget = { x: 950, y: 105, z: 380 }; // a long banked run over Port Meridian
   } else if (name === 'landing') {
-    autopilotTarget = { x: RUNWAY.x, y: RUNWAY.elevation + 2, z: RUNWAY.zTo - 20 };
+    // Aim above the threshold so the frame catches her flaring over it.
+    autopilotTarget = { x: RUNWAY.x, y: RUNWAY.elevation + 8, z: RUNWAY.zTo - 20 };
   } else if (course && course.next) {
     autopilotTarget = course.next.data;
   }
