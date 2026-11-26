@@ -1,6 +1,6 @@
-// terrain.js — the Meridian archipelago: one analytic height field that the
-// terrain mesh, the flight model and the collision checks all share, so the
-// ground the pilot sees is exactly the ground the physics knows about.
+// terrain.js — the world: one analytic height field builds the terrain
+// mesh and answers every physics height query, so the ground the pilot
+// sees is exactly the ground the flight model flies against.
 //
 // Layout (metres, +X east, +Z south, heading 0 = north = -Z):
 //   - Meridian Isle, the big home island, centred near (-100, 300): rolling

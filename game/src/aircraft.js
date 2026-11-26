@@ -1,8 +1,8 @@
-// aircraft.js — the Kestrel K-6 airmail seaplane: a primitive-built model
-// (fuselage, high wing, twin floats, spinning prop, lit nav lights) and an
-// arcade flight model with throttle discipline, coordinated turns, stall,
-// wind drift, fuel burn and damage. One clear job: everything about the
-// aeroplane itself lives here; the world and the missions live elsewhere.
+// aircraft.js — the aeroplane: the Kestrel K-6 seaplane model (fuselage,
+// high wing, twin floats, spinning prop, lit nav lights) and its flight
+// model — throttle discipline, coordinated turns, stall, wind drift, fuel
+// burn, hull damage and rated landings. Everything about the plane itself
+// lives here; the world and the missions live elsewhere.
 
 import { RUNWAY, terrainHeight } from './terrain.js';
 

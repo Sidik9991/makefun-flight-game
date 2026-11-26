@@ -4,7 +4,7 @@
 // from. The world lives in terrain.js, the aeroplane in aircraft.js, the
 // sorties in missions.js, the panel in hud.js, the sound in audio.js.
 
-import { RUNWAY, buildWorld, isOnRunway, terrainHeight } from './terrain.js';
+import { buildWorld, isOnRunway, terrainHeight } from './terrain.js';
 import { PLANE, createAircraft } from './aircraft.js';
 import { MISSIONS, createCourse, landingTarget } from './missions.js';
 import { createHud } from './hud.js';
@@ -386,8 +386,11 @@ function frame(now) {
 }
 
 // ---- staged screenshot scenes -----------------------------------------------------
-// ?shot=cover|rings|city|landing places the Kestrel mid-sortie under a
-// simple autopilot so the maker's screenshots are real, repeatable renders.
+// ?shot=cover|menu|coast|summit|stakes|progress|result composes a real,
+// repeatable moment of the game for the maker's screenshots: the Kestrel
+// mid-sortie under a simple autopilot, the sortie board with the run half
+// flown, or the postmaster's debrief after a rated landing. Nothing here is
+// drawn for the camera — every scene is a state the game itself can reach.
 
 let autopilotTarget = null;
 
@@ -409,26 +412,66 @@ function autopilotInput() {
   return { pitch, roll, throttleDelta, rudder: 0 };
 }
 
+// Mid-course bookkeeping for a staged scene: rings already flown read
+// green on the course and counted on the panel, exactly as if the Kestrel
+// had threaded them herself on the way to this frame.
+function stageProgress(flown, mailScore) {
+  if (!course) return;
+  course.nextIndex = flown;
+  course.flown = flown;
+  score = mailScore;
+}
+
 function stageShotScene(name) {
+  document.body.classList.add('shot-mode');
+
+  if (name === 'menu') {
+    // The sortie board with the run under way: two sorties delivered, the
+    // other four open — all six courses and their ring counts on one card.
+    unlocked = MISSIONS.length;
+    completed.add(0);
+    completed.add(1);
+    buildMissionList();
+    showMenu();
+    return;
+  }
+
+  if (name === 'result') {
+    // The debrief: the first sortie brought home with a greaser touchdown,
+    // the ledger signed, the postmaster's grade on the card.
+    startMission(0);
+    stageProgress(5, 800);
+    sortieTime = 214;
+    plane.fuel = 31;
+    plane.damage = 3;
+    plane.landedRating = 'GREASER';
+    completeMission('Down safe with a greaser touchdown at 61 knots. The postmaster signs the ledger.');
+    return;
+  }
+
   const scenes = {
-    cover: { mission: 0, x: -260, y: 100, z: 1180, headingDeg: 0, speed: 47, throttle: 0.6 },
-    rings: { mission: 2, x: 602, y: 70, z: 430, headingDeg: 350, speed: 52, throttle: 0.64 },
-    city: { mission: 1, x: 120, y: 128, z: 640, headingDeg: 74, speed: 54, throttle: 0.66 },
-    landing: { mission: 0, x: -256, y: 48, z: 1180, headingDeg: 0, speed: 34, throttle: 0.28 },
+    // Threading the Thread: on the river's centreline, first ring close
+    // ahead, canyon walls on both shoulders, panel lit, speed up.
+    cover: { mission: 2, x: 592, y: 66, z: 470, headingDeg: 355, speed: 57, throttle: 0.74 },
+    // The Harbour Chain over Port Meridian's blocks, third ring lit.
+    coast: { mission: 1, x: 600, y: 112, z: 180, headingDeg: 130, speed: 55, throttle: 0.66, flown: 2, mail: 200 },
+    // Summit Post on the Anvil climb, above the snow line, third ring lit.
+    summit: { mission: 3, x: 1130, y: 395, z: -1360, headingDeg: 70, speed: 58, throttle: 0.72, flown: 2, mail: 200 },
+    // The Storm Ledger with the stakes showing: fuel at 15, hull at 58,
+    // Lantern Isle and its lighthouse ahead through the crosswind.
+    stakes: { mission: 4, x: -1470, y: 96, z: 1000, headingDeg: 208, speed: 52, throttle: 0.68, flown: 3, mail: 300, fuel: 15, damage: 42 },
+    // Home at Dusk, five of seven rings flown, the mail score telling the
+    // evening's story on the panel.
+    progress: { mission: 5, x: 770, y: 104, z: 1245, headingDeg: 285, speed: 54, throttle: 0.66, flown: 5, mail: 1700 },
   };
   const s = scenes[name] || scenes.cover;
-  document.body.classList.add('shot-mode');
   startMission(s.mission);
   plane.placeAirborne(s.x, s.y, s.z, s.headingDeg, s.speed, s.throttle);
   plane.fuel = MISSIONS[s.mission].fuel;
-  if (name === 'city') {
-    autopilotTarget = { x: 950, y: 105, z: 380 }; // a long banked run over Port Meridian
-  } else if (name === 'landing') {
-    // Aim above the threshold so the frame catches her flaring over it.
-    autopilotTarget = { x: RUNWAY.x, y: RUNWAY.elevation + 8, z: RUNWAY.zTo - 20 };
-  } else if (course && course.next) {
-    autopilotTarget = course.next.data;
-  }
+  if (s.flown) stageProgress(s.flown, s.mail);
+  if (s.fuel !== undefined) plane.fuel = s.fuel;
+  if (s.damage !== undefined) plane.damage = s.damage;
+  autopilotTarget = course && course.next ? course.next.data : landingTarget();
   // Camera starts already settled behind the plane for a composed frame.
   camPos.copy(plane.position).add(new THREE.Vector3(0, 5, 14));
   state = 'flying';

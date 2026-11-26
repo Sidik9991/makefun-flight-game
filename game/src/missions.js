@@ -1,8 +1,8 @@
-// missions.js — the six airmail sorties of the Meridian run, the golden
-// rings that mark each course, and the bookkeeping that decides when a
-// ring is flown, a parcel is away and a mission is done. Different goals
-// per sortie: a first circuit, a harbour chain, threading the canyon,
-// climbing the Anvil, a low-fuel storm run, and the dusk arrival home.
+// missions.js — the sorties and their scoring geometry: six airmail
+// courses (35 golden rings in all) and the plane-crossing checks that
+// decide when a ring is flown and a course is done — a first circuit, a
+// harbour chain, threading the canyon, climbing the Anvil, a low-fuel
+// storm run, and the dusk arrival home.
 
 import { RUNWAY, riverCentreX } from './terrain.js';
 
