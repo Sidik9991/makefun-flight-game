@@ -213,14 +213,20 @@ function bearingTo(from, to) {
   return ((deg % 360) + 360) % 360;
 }
 
+// A staged scene may ask for a closer, lower, offset camera — the cover's
+// hero framing. Null in play and in every other scene: the standard chase
+// camera below is then exactly what it always was.
+let shotCamProfile = null;
+
 function updateChaseCamera(dt) {
   const h = plane.heading;
   const back = new THREE.Vector3(-Math.sin(h), 0, Math.cos(h));
   const right = new THREE.Vector3(Math.cos(h), 0, Math.sin(h));
+  const prof = shotCamProfile;
   const desired = plane.position.clone()
-    .addScaledVector(back, 13.5)
-    .addScaledVector(right, -plane.roll * 3.2)
-    .add(new THREE.Vector3(0, 4.4 + plane.pitch * 2, 0));
+    .addScaledVector(back, prof ? prof.back : 13.5)
+    .addScaledVector(right, prof ? prof.side : -plane.roll * 3.2)
+    .add(new THREE.Vector3(0, prof ? prof.up : 4.4 + plane.pitch * 2, 0));
   const k = 1 - Math.exp(-dt * 4.2);
   camPos.lerp(desired, k);
   // Never let the camera sink into a hillside it is chasing over.
@@ -232,7 +238,7 @@ function updateChaseCamera(dt) {
     .add(new THREE.Vector3(0, 1.6, 0));
   camTarget.lerp(look, 1 - Math.exp(-dt * 7));
   camera.lookAt(camTarget);
-  const targetFov = 62 + (plane.speed / PLANE.maxSpeed) * 7;
+  const targetFov = prof ? prof.fov : 62 + (plane.speed / PLANE.maxSpeed) * 7;
   if (Math.abs(camera.fov - targetFov) > 0.1) {
     camera.fov += (targetFov - camera.fov) * Math.min(1, dt * 3);
     camera.updateProjectionMatrix();
@@ -387,14 +393,19 @@ function frame(now) {
 }
 
 // ---- staged screenshot scenes -----------------------------------------------------
-// ?shot=cover|menu|coast|summit|stakes|progress|result|landing composes a
-// real, repeatable moment of the game for the maker's screenshots: the
-// Kestrel
-// mid-sortie under a simple autopilot, the sortie board with the run half
-// flown, or the postmaster's debrief after a rated landing. Nothing here is
-// drawn for the camera — every scene is a state the game itself can reach.
+// ?shot=cover|canyon|menu|coast|summit|stakes|progress|result|landing
+// composes a real, repeatable moment of the game for the maker's
+// screenshots: the Kestrel mid-sortie under a simple autopilot, the
+// sortie board with the run half flown, or the postmaster's debrief
+// after a rated landing. The cover adds the game's title treatment and
+// a closer hero camera over a live flight scene. Nothing here is drawn
+// for the camera — every scene is a state the game itself can reach.
 
 let autopilotTarget = null;
+// A staged scene may pin the throttle (the landing's slow final): the
+// stock autopilot floors it below 40 m/s, which turns a staged approach
+// into a dive before the shutter can fire.
+let shotThrottleHold = null;
 
 function autopilotInput() {
   if (!autopilotTarget) return { pitch: 0, roll: 0, throttleDelta: 0, rudder: 0 };
@@ -405,7 +416,9 @@ function autopilotInput() {
   const desiredPitch = Math.max(-0.32, Math.min(0.34, (to.y - plane.position.y) * 0.008));
   const pitch = Math.max(-1, Math.min(1, (desiredPitch - plane.pitch) * 3.2));
   const dist = Math.hypot(to.x - plane.position.x, to.z - plane.position.z);
-  const throttleDelta = plane.speed < 40 ? 0.4 : plane.speed > 62 ? -0.3 : 0;
+  const throttleDelta = shotThrottleHold !== null
+    ? Math.max(-1, Math.min(1, (shotThrottleHold - plane.throttle) * 2.5))
+    : plane.speed < 40 ? 0.4 : plane.speed > 62 ? -0.3 : 0;
   if (dist < 30 && course && !course.done) {
     // In shot mode the course still advances ring by ring via crossings;
     // simply retarget the next ring when close.
@@ -452,10 +465,19 @@ function stageShotScene(name) {
   }
 
   const scenes = {
-    // Threading the Thread: deep in the canyon on the river's centreline,
-    // third ring close ahead, rock walls on both shoulders, panel lit.
-    cover: { mission: 2, x: 214, y: 64, z: -350, headingDeg: 335, speed: 57, throttle: 0.74, flown: 2, mail: 200 },
-    // The Harbour Chain over Port Meridian's blocks, third ring lit.
+    // THE COVER (v4): the Harbour Chain ridden as a hero shot — the
+    // Kestrel big in frame on a close, low, offset camera, third ring
+    // burning ahead over Port Meridian's towers, the sun on the sea
+    // beyond, and the game's title treatment set over the sky while the
+    // panel stays lit and live below. Staged on the coast run-in so the
+    // shutter can fire on the ring-close trigger like the canyon did.
+    cover: { mission: 1, x: 615, y: 102, z: 195, headingDeg: 127, speed: 56, throttle: 0.7, flown: 2, mail: 300, time: 192, fuel: 78 },
+    // Threading the Thread, climbing: staged below the third ring's
+    // centre so the autopilot pitches her up the canyon on the climb —
+    // V/S positive, throttle high, rock walls on both shoulders.
+    canyon: { mission: 2, x: 214, y: 50, z: -330, headingDeg: 335, speed: 58, throttle: 0.84, flown: 2, mail: 200, time: 287, fuel: 64, damage: 6 },
+    // The Harbour Chain over Port Meridian's blocks, third ring lit
+    // (the standard-camera alternate to the cover's hero framing).
     coast: { mission: 1, x: 600, y: 112, z: 180, headingDeg: 130, speed: 55, throttle: 0.66, flown: 2, mail: 200 },
     // Summit Post on the Anvil climb, above the snow line, third ring lit
     // and close: already on the climb gradient, fast, so she holds the
@@ -464,11 +486,13 @@ function stageShotScene(name) {
     // The Storm Ledger with the stakes showing: fuel at 15, hull at 58,
     // on the run-in to the fifth ring with Lantern Isle and its
     // lighthouse filling the frame ahead through the crosswind.
-    stakes: { mission: 4, x: -1545, y: 92, z: 1215, headingDeg: 207, speed: 52, throttle: 0.68, flown: 4, mail: 400, fuel: 15, damage: 42 },
-    // First Light Run brought home: all five rings flown, on final for
-    // the home strip, flaring over the threshold piano keys — the rated
-    // landing itself, caught in flight instead of on the debrief card.
-    landing: { mission: 0, x: -256, y: 48, z: 1180, headingDeg: 0, speed: 34, throttle: 0.28, flown: 5, mail: 800 },
+    stakes: { mission: 4, x: -1545, y: 92, z: 1215, headingDeg: 207, speed: 52, throttle: 0.68, flown: 4, mail: 400, time: 331, fuel: 15, damage: 42 },
+    // First Light Run brought home: all five rings flown, on a slow
+    // final for the home strip — staged closer, lower and slower than
+    // v3's arrival (which the panel read at 108 kt, a dive, not a
+    // flare): throttle low, aim point high over the near threshold, so
+    // the frame catches her at flare speed over the piano keys.
+    landing: { mission: 0, x: -258, y: 38, z: 1100, headingDeg: 0, speed: 31, throttle: 0.26, flown: 5, mail: 800, time: 214, fuel: 31, damage: 3 },
     // Home at Dusk, five of seven rings flown, the mail score telling the
     // evening's story on the panel.
     progress: { mission: 5, x: 770, y: 104, z: 1245, headingDeg: 285, speed: 54, throttle: 0.66, flown: 5, mail: 1700 },
@@ -480,11 +504,21 @@ function stageShotScene(name) {
   if (s.flown) stageProgress(s.flown, s.mail);
   if (s.fuel !== undefined) plane.fuel = s.fuel;
   if (s.damage !== undefined) plane.damage = s.damage;
+  // The panel clock tells the sortie's story too: each staged frame is
+  // minutes into its run, never 00:0x.
+  if (s.time) sortieTime = s.time;
+  if (name === 'cover') {
+    // The hero framing and the title treatment belong to the cover alone.
+    shotCamProfile = { back: 9.0, up: 3.1, side: 3.4, fov: 66 };
+    document.getElementById('title-card').classList.add('show');
+  }
   autopilotTarget = course && course.next ? course.next.data : landingTarget();
   if (name === 'landing') {
-    // Aim just above the far threshold so the frame catches her flaring
-    // over the piano keys, not arriving short of the strip.
-    autopilotTarget = { x: RUNWAY.x, y: RUNWAY.elevation + 8, z: RUNWAY.zTo - 20 };
+    // Aim high over the near threshold so she crosses the piano keys
+    // level and slow, flaring, instead of diving at the far end — and
+    // pin the throttle so the approach stays at flare speed.
+    autopilotTarget = { x: RUNWAY.x, y: RUNWAY.elevation + 12, z: RUNWAY.zTo - 60 };
+    shotThrottleHold = 0.26;
   }
   // Camera starts already settled behind the plane for a composed frame.
   camPos.copy(plane.position).add(new THREE.Vector3(0, 5, 14));
