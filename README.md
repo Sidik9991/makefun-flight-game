@@ -60,15 +60,18 @@ mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
 The screenshots in `screenshots/` are real renders of this game's own code,
 taken by its maker in a headless browser from staged scenes
-(`game/src/main.js` answers `?shot=cover|menu|coast|summit|stakes|progress|result`):
+(`game/src/main.js` answers `?shot=cover|menu|coast|summit|stakes|progress|result|landing`).
+Every frame is in flight, panel lit, the sortie under way:
 
 - `01-cover.jpg` — threading the Thread canyon, third ring close ahead,
-  walls on both shoulders, the panel lit at 118 kt.
-- `02-sortie-select.jpg` — the sortie board: all six courses with their
-  ring counts (35 rings in all), two delivered, four ready to fly.
+  walls on both shoulders, the panel lit at 122 kt.
+- `02-harbour-coast.jpg` — the Harbour Chain over Port Meridian's towers:
+  third ring lit ahead, a second abeam, RINGS 3/7 and MAIL 300 on the panel.
 - `03-storm-stakes.jpg` — the Storm Ledger with the stakes showing: the
-  fuel bar down to a red stub, the hull bar spent, rings still ahead.
-- `04-landing-result.jpg` — the postmaster's debrief: rings 5/5, a GREASER
-  landing rating, grade S, and the mail score in the ledger.
+  fuel bar down to a red stub, the fifth ring ahead, Lantern Isle's
+  lighthouse beyond it.
+- `04-runway-landing.jpg` — the rated landing itself: all five rings
+  flown, flaring over the home strip's threshold piano keys at 27 m,
+  V/S −2.2 m/s on the panel.
 
 MIT licensed — see `LICENSE`.
