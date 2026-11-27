@@ -5,7 +5,7 @@
 // terrain.js, the aeroplane in aircraft.js, the sorties in missions.js,
 // the panel in hud.js, the sound in audio.js.
 
-import { buildWorld, isOnRunway, terrainHeight } from './terrain.js';
+import { buildWorld, isOnRunway, terrainHeight, RUNWAY } from './terrain.js';
 import { PLANE, createAircraft } from './aircraft.js';
 import { MISSIONS, createCourse, landingTarget } from './missions.js';
 import { createHud } from './hud.js';
@@ -387,8 +387,9 @@ function frame(now) {
 }
 
 // ---- staged screenshot scenes -----------------------------------------------------
-// ?shot=cover|menu|coast|summit|stakes|progress|result composes a real,
-// repeatable moment of the game for the maker's screenshots: the Kestrel
+// ?shot=cover|menu|coast|summit|stakes|progress|result|landing composes a
+// real, repeatable moment of the game for the maker's screenshots: the
+// Kestrel
 // mid-sortie under a simple autopilot, the sortie board with the run half
 // flown, or the postmaster's debrief after a rated landing. Nothing here is
 // drawn for the camera — every scene is a state the game itself can reach.
@@ -461,8 +462,13 @@ function stageShotScene(name) {
     // line instead of wallowing up to it.
     summit: { mission: 3, x: 1230, y: 425, z: -1420, headingDeg: 68, speed: 62, throttle: 0.8, flown: 2, mail: 200 },
     // The Storm Ledger with the stakes showing: fuel at 15, hull at 58,
-    // Lantern Isle and its lighthouse ahead through the crosswind.
-    stakes: { mission: 4, x: -1470, y: 96, z: 1000, headingDeg: 208, speed: 52, throttle: 0.68, flown: 3, mail: 300, fuel: 15, damage: 42 },
+    // on the run-in to the fifth ring with Lantern Isle and its
+    // lighthouse filling the frame ahead through the crosswind.
+    stakes: { mission: 4, x: -1545, y: 92, z: 1215, headingDeg: 207, speed: 52, throttle: 0.68, flown: 4, mail: 400, fuel: 15, damage: 42 },
+    // First Light Run brought home: all five rings flown, on final for
+    // the home strip, flaring over the threshold piano keys — the rated
+    // landing itself, caught in flight instead of on the debrief card.
+    landing: { mission: 0, x: -256, y: 48, z: 1180, headingDeg: 0, speed: 34, throttle: 0.28, flown: 5, mail: 800 },
     // Home at Dusk, five of seven rings flown, the mail score telling the
     // evening's story on the panel.
     progress: { mission: 5, x: 770, y: 104, z: 1245, headingDeg: 285, speed: 54, throttle: 0.66, flown: 5, mail: 1700 },
@@ -475,6 +481,11 @@ function stageShotScene(name) {
   if (s.fuel !== undefined) plane.fuel = s.fuel;
   if (s.damage !== undefined) plane.damage = s.damage;
   autopilotTarget = course && course.next ? course.next.data : landingTarget();
+  if (name === 'landing') {
+    // Aim just above the far threshold so the frame catches her flaring
+    // over the piano keys, not arriving short of the strip.
+    autopilotTarget = { x: RUNWAY.x, y: RUNWAY.elevation + 8, z: RUNWAY.zTo - 20 };
+  }
   // Camera starts already settled behind the plane for a composed frame.
   camPos.copy(plane.position).add(new THREE.Vector3(0, 5, 14));
   state = 'flying';
