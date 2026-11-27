@@ -60,18 +60,20 @@ mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
 The screenshots in `screenshots/` are real renders of this game's own code,
 taken by its maker in a headless browser from staged scenes
-(`game/src/main.js` answers `?shot=cover|menu|coast|summit|stakes|progress|result|landing`).
+(`game/src/main.js` answers `?shot=cover|canyon|menu|coast|summit|stakes|progress|result|landing`).
 Every frame is in flight, panel lit, the sortie under way:
 
-- `01-cover.jpg` — threading the Thread canyon, third ring close ahead,
-  walls on both shoulders, the panel lit at 122 kt.
-- `02-harbour-coast.jpg` — the Harbour Chain over Port Meridian's towers:
-  third ring lit ahead, a second abeam, RINGS 3/7 and MAIL 300 on the panel.
+- `01-cover.jpg` — the hero shot: the Kestrel big in frame inside the
+  third Harbour Chain ring over Port Meridian's towers, the game's title
+  treatment over the sky naming its systems (6 sorties, 35 golden rings,
+  fuel & hull stakes, rated landings), the panel live at 120 kt.
+- `02-canyon-climb.jpg` — climbing through the Thread canyon: third ring
+  filling the frame, walls on both shoulders, V/S +1.2 m/s on the panel.
 - `03-storm-stakes.jpg` — the Storm Ledger with the stakes showing: the
   fuel bar down to a red stub, the fifth ring ahead, Lantern Isle's
   lighthouse beyond it.
-- `04-runway-landing.jpg` — the rated landing itself: all five rings
-  flown, flaring over the home strip's threshold piano keys at 27 m,
-  V/S −2.2 m/s on the panel.
+- `04-final-approach.jpg` — the rated landing itself: all five rings
+  flown, flaring slow over the home strip's threshold piano keys at
+  30 m and 52 kt, throttle at a quarter on the panel.
 
 MIT licensed — see `LICENSE`.
